@@ -1,9 +1,10 @@
 import asyncio
 import os
+import json
 from dotenv import load_dotenv
 from fastmcp import Client
 from fastmcp.client.transports import PythonStdioTransport
-from anthropic import Anthropic
+from openai import OpenAI
 
 load_dotenv()  # Load environment variables from .env
 
@@ -12,8 +13,11 @@ async def main():
     transport = PythonStdioTransport(script_path="server.py")
     client = Client(transport)
 
-    # Initialize the Anthropic client
-    anthropic = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    # Initialize the OpenAI client to use Groq's API
+    openai_client = OpenAI(
+        api_key=os.getenv("GROQ_API_KEY"),
+        base_url="https://api.groq.com/openai/v1"
+    )
 
     async with client:
         # List available tools from the MCP server
@@ -21,29 +25,47 @@ async def main():
         print("Available tools:", [tool.name for tool in tools])
 
         # Define the user query
-        # user_query = "What is 5 plus 7?"
+        user_query = "What is 5 plus 7?"
 
-        # # Prepare the messages for the LLM
-        # messages = [{"role": "user", "content": user_query}]
+        # Prepare the messages for the LLM
+        messages = [{"role": "user", "content": user_query}]
 
-        # # Call the Anthropic API with the available tools and LLM will decide which tool to use
-        # response = anthropic.messages.create(
-        #     model="claude-3-5-sonnet-20241022",
-        #     max_tokens=1000,
-        #     messages=messages,
-        #     tools=[{"name": tool.name, "description": tool.description, "input_schema": tool.input_schema} for tool in tools]
-        # )
+        # Convert MCP tools to OpenAI tools format
+        openai_tools = []
+        for tool in tools:
+            openai_tools.append({
+                "type": "function",
+                "function": {
+                    "name": tool.name,
+                    "description": tool.description,
+                    "parameters": tool.inputSchema
+                }
+            })
+        
+        # Call the Groq API via OpenAI client
+        response = openai_client.chat.completions.create(
+            model="llama3-70b-8192",  # Groq's LLaMA 3 model
+            messages=messages,
+            tools=openai_tools,
+            tool_choice="auto"
+        )
 
-        # # Process the response and handle tool calls
-        # for content in response.content:
-        #     if content.type == "text":
-        #         print("Claude:", content.text)
-        #     elif content.type == "tool_use":
-        #         tool_name = content.name
-        #         tool_args = content.input
-        #         # Execute the tool call via the MCP client
-        #         result = await client.call_tool(tool_name, tool_args)
-        #         print(f"Tool '{tool_name}' result:", result.content)
+        # Process the response and handle tool calls
+        assistant_message = response.choices[0].message
+        
+        # Print text response
+        if assistant_message.content:
+            print("LLM:", assistant_message.content)
+        
+        # Handle any tool calls
+        if hasattr(assistant_message, 'tool_calls') and assistant_message.tool_calls:
+            for tool_call in assistant_message.tool_calls:
+                tool_name = tool_call.function.name
+                tool_args = json.loads(tool_call.function.arguments)
+                
+                # Execute the tool call via the MCP client
+                result = await client.call_tool(tool_name, tool_args)
+                print(f"Tool '{tool_name}' result:", result)
 
 if __name__ == "__main__":
     asyncio.run(main())

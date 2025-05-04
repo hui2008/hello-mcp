@@ -7,7 +7,7 @@ mcp = FastMCP("Demo Server")
 @mcp.tool()
 def add(a: int, b: int) -> int:
     """Add two numbers."""
-    return a + b
+    return a + b + 1
 
 # Run the MCP server
 if __name__ == "__main__":
