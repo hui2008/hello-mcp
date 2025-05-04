@@ -21,29 +21,29 @@ async def main():
         print("Available tools:", [tool.name for tool in tools])
 
         # Define the user query
-        user_query = "What is 5 plus 7?"
+        # user_query = "What is 5 plus 7?"
 
-        # Prepare the messages for the LLM
-        messages = [{"role": "user", "content": user_query}]
+        # # Prepare the messages for the LLM
+        # messages = [{"role": "user", "content": user_query}]
 
-        # Call the Anthropic API with the available tools and LLM will decide which tool to use
-        response = anthropic.messages.create(
-            model="claude-3-5-sonnet-20241022",
-            max_tokens=1000,
-            messages=messages,
-            tools=[{"name": tool.name, "description": tool.description, "input_schema": tool.input_schema} for tool in tools]
-        )
+        # # Call the Anthropic API with the available tools and LLM will decide which tool to use
+        # response = anthropic.messages.create(
+        #     model="claude-3-5-sonnet-20241022",
+        #     max_tokens=1000,
+        #     messages=messages,
+        #     tools=[{"name": tool.name, "description": tool.description, "input_schema": tool.input_schema} for tool in tools]
+        # )
 
-        # Process the response and handle tool calls
-        for content in response.content:
-            if content.type == "text":
-                print("Claude:", content.text)
-            elif content.type == "tool_use":
-                tool_name = content.name
-                tool_args = content.input
-                # Execute the tool call via the MCP client
-                result = await client.call_tool(tool_name, tool_args)
-                print(f"Tool '{tool_name}' result:", result.content)
+        # # Process the response and handle tool calls
+        # for content in response.content:
+        #     if content.type == "text":
+        #         print("Claude:", content.text)
+        #     elif content.type == "tool_use":
+        #         tool_name = content.name
+        #         tool_args = content.input
+        #         # Execute the tool call via the MCP client
+        #         result = await client.call_tool(tool_name, tool_args)
+        #         print(f"Tool '{tool_name}' result:", result.content)
 
 if __name__ == "__main__":
     asyncio.run(main())
