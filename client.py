@@ -3,17 +3,21 @@ import os
 import json
 from dotenv import load_dotenv
 from fastmcp import Client
-from fastmcp.client.transports import PythonStdioTransport
+from fastmcp.client.transports import SSETransport
 from openai import OpenAI
 
 load_dotenv()  # Load environment variables from .env
 
 async def main():
-    # Set up the transport to connect to the MCP server
-    transport = PythonStdioTransport(script_path="server.py")
+    # 1) Configure the SSE Transport to point at your running MCP server:
+    #    By default FastMCP(server).run(transport="sse") will expose an /sse endpoint.
+    mcp_url = os.getenv("MCP_SERVER_URL", "http://localhost:8000")
+    transport = SSETransport(url=f"{mcp_url}/sse")
+
+    # 2) Create your Client
     client = Client(transport)
 
-    # Initialize the OpenAI client to use Groq's API
+    # 3) Configure your OpenAI / Groq client
     openai_client = OpenAI(
         api_key=os.getenv("GROQ_API_KEY"),
         base_url="https://api.groq.com/openai/v1"

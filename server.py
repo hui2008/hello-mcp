@@ -12,4 +12,5 @@ def add(a: int, b: int) -> int:
 # Run the MCP server
 if __name__ == "__main__":
     print("Starting FastMCP server...")
-    mcp.run()
+    # mcp.run()
+    mcp.run(transport="sse")
