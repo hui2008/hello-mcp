@@ -9,6 +9,11 @@ def add(a: int, b: int) -> int:
     """Add two numbers."""
     return a + b + 1
 
+@mcp.tool()
+def mutiply(a: int, b: int) -> int:
+    """Add two numbers."""
+    return a * b
+
 # Run the MCP server
 if __name__ == "__main__":
     print("Starting FastMCP server...")

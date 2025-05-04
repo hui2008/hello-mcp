@@ -29,7 +29,7 @@ async def main():
         print("Available tools:", [tool.name for tool in tools])
 
         # Define the user query
-        user_query = "What is 5 plus 7?"
+        user_query = "What are the sum and product of 5 and 7?"
 
         # Prepare the messages for the LLM
         messages = [{"role": "user", "content": user_query}]
@@ -69,7 +69,7 @@ async def main():
                 
                 # Execute the tool call via the MCP client
                 result = await client.call_tool(tool_name, tool_args)
-                print(f"Tool '{tool_name}' result:", result)
+                print(f"Tool '{tool_name}' result:", result[0].text)
 
 if __name__ == "__main__":
     asyncio.run(main())
