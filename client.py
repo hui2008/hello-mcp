@@ -26,10 +26,10 @@ async def main():
     async with client:
         # List available tools from the MCP server
         tools = await client.list_tools()
-        print("Available tools:", [tool.name for tool in tools])
+        print("Available tools:", tools)
 
         # Define the user query
-        user_query = "What are the sum and product of 5 and 7?"
+        user_query = "What are the product and sum of 5 and 7? answer product first then sum"
 
         # Prepare the messages for the LLM
         messages = [{"role": "user", "content": user_query}]

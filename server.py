@@ -11,7 +11,7 @@ def add(a: int, b: int) -> int:
 
 @mcp.tool()
 def mutiply(a: int, b: int) -> int:
-    """Add two numbers."""
+    """Multiply two numbers."""
     return a * b
 
 # Run the MCP server
