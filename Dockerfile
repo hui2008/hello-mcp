@@ -6,8 +6,8 @@
 
 # Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
 
-ARG PYTHON_VERSION=3.13.3
-FROM python:${PYTHON_VERSION}-slim as base
+ARG PYTHON_VERSION=3.12
+FROM python:${PYTHON_VERSION} AS base
 
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -18,34 +18,24 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Create a non-privileged user that the app will run under.
-# See https://docs.docker.com/go/dockerfile-user-best-practices/
-ARG UID=10001
-RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home "/nonexistent" \
-    --shell "/sbin/nologin" \
-    --no-create-home \
-    --uid "${UID}" \
-    appuser
-
+COPY . .
 # Download dependencies as a separate step to take advantage of Docker's caching.
 # Leverage a cache mount to /root/.cache/pip to speed up subsequent builds.
 # Leverage a bind mount to requirements.txt to avoid having to copy them into
 # into this layer.
-RUN --mount=type=cache,target=/root/.cache/pip \
-    --mount=type=bind,source=requirements.txt,target=requirements.txt \
-    python -m pip install -r requirements.txt
+RUN pip install --upgrade pip uv \
+    && uv sync
 
-# Switch to the non-privileged user to run the application.
-USER appuser
+# RUN --mount=type=cache,target=/root/.cache/pip \
+#     --mount=type=bind,source=requirements.txt,target=requirements.txt \
+#     python -m pip install -r requirements.txt
 
-# Copy the source code into the container.
-COPY . .
+FROM python:${PYTHON_VERSION}-slim
 
-# Expose the port that the application listens on.
-EXPOSE 8000
+WORKDIR /app
 
-# Run the application.
-CMD gunicorn '.venv.lib.python3.12.site-packages.httpx._transports.wsgi' --bind=0.0.0.0:8000
+COPY --from=base /app/.venv/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=base /app/mcp ./mcp
+
+# EXPOSE 8000
+CMD [ "python", "mcp/server.py" ]
