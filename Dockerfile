@@ -35,16 +35,20 @@ FROM python:${PYTHON_VERSION}-slim
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
+COPY --from=base /app/.venv/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+
 RUN apt-get update \
- && apt-get install -y --no-install-recommends nginx \
+ && apt-get install -y --no-install-recommends nginx cron \
  && apt-get clean && rm -rf /var/lib/apt/lists/* \
  && pip install --no-cache-dir supervisor
 
 WORKDIR /app
 
-COPY --from=base /app/.venv/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
-COPY --from=base /app/mcp mcp
 COPY --from=base /app/docker/nginx.conf /etc/nginx/nginx.conf
 COPY --from=base /app/docker/supervisord.conf /etc/supervisor/supervisord.conf
+COPY --from=base /app/mcp mcp
+
+# COPY --from=base /app/docker/crawler /etc/cron.d/
+# RUN chmod 0644 /etc/cron.d/crawler && crontab /etc/cron.d/crawler
 
 CMD ["supervisord", "-n"]
