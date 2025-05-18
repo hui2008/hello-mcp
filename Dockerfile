@@ -38,7 +38,8 @@ ENV PYTHONUNBUFFERED=1
 RUN apt-get update \
  && apt-get install -y --no-install-recommends nginx cron \
  && apt-get clean && rm -rf /var/lib/apt/lists/* \
- && pip install --no-cache-dir supervisor
+ && pip install --no-cache-dir supervisor \
+ && touch /var/log/crawler.log
 
 WORKDIR /app
 
