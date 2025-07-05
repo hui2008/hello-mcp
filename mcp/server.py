@@ -18,4 +18,4 @@ def mutiply(a: int, b: int) -> int:
 if __name__ == "__main__":
     print("Starting FastMCP server...")
     # mcp.run()
-    mcp.run(transport="sse")
+    mcp.run(transport="streamable-http")

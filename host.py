@@ -3,7 +3,7 @@ import os
 import json
 from dotenv import load_dotenv
 from fastmcp import Client
-from fastmcp.client.transports import SSETransport
+from fastmcp.client.transports import StreamableHttpTransport
 from openai import OpenAI
 
 load_dotenv()  # Load environment variables from .env
@@ -12,7 +12,7 @@ async def main():
     # 1) Configure the SSE Transport to point at your running MCP server:
     #    By default FastMCP(server).run(transport="sse") will expose an /sse endpoint.
     mcp_url = os.getenv("MCP_SERVER_URL", "http://localhost:8000")
-    transport = SSETransport(url=f"{mcp_url}/sse")
+    transport = StreamableHttpTransport(url=f"{mcp_url}/mcp")
 
     # 2) Create your Client
     client = Client(transport)
@@ -69,7 +69,7 @@ async def main():
                 
                 # Execute the tool call via the MCP client
                 result = await client.call_tool(tool_name, tool_args)
-                print(f"Tool '{tool_name}' result:", result[0].text)
+                print(f"Tool '{tool_name}' result:", result)
 
 if __name__ == "__main__":
     asyncio.run(main())

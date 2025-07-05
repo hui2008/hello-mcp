@@ -1,0 +1,23 @@
+    1  .venv/bin/mcp dev main.py 
+
+    8  uv pip compile pyproject.toml -o requirements.txt
+    9  .venv/bin/activate
+   10  uv --hep
+   11  pipx install uv
+   12  uv pip compile pyproject.toml -o requirements.txt
+
+   14  uv add dotenv
+
+
+
+   18  uv add anthropic
+
+   20  pip install -r requirements.txt 
+
+   25  uv add openai
+
+   27  uv pip compile pyproject.toml -o requirements.txt
+   28  pip install -r requirements.txt 
+   29  uv pip install --upgrade dotenv fastmcp openai
+   30  uv add fastmcp
+uv pip install --upgrade fastmcp
